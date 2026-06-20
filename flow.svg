@@ -1,0 +1,48 @@
+<svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Segoe UI,system-ui,sans-serif">
+  <rect width="760" height="220" rx="14" fill="#0E1822"/>
+  <!-- faint grid -->
+  <g stroke="#1d2c38" stroke-width="1">
+    <line x1="0" y1="55" x2="760" y2="55"/><line x1="0" y1="110" x2="760" y2="110"/><line x1="0" y1="165" x2="760" y2="165"/>
+  </g>
+  <text x="30" y="38" fill="#5CC6E8" font-family="IBM Plex Mono,monospace" font-size="13" letter-spacing="3">COMP // HOW IT FLOWS</text>
+
+  <!-- steps -->
+  <g>
+    <!-- step boxes -->
+    <g>
+      <rect x="30"  y="80" width="150" height="90" rx="11" fill="#16242F" stroke="#2A3D4A"/>
+      <circle cx="55" cy="105" r="13" fill="#5CC6E8"/><text x="55" y="110" text-anchor="middle" fill="#0E1822" font-weight="700" font-size="14">1</text>
+      <text x="80" y="110" fill="#E6EDF2" font-size="14" font-weight="600">Target house</text>
+      <text x="48" y="140" fill="#8FA3B0" font-size="12">List price, sqft,</text>
+      <text x="48" y="157" fill="#8FA3B0" font-size="12">beds / baths</text>
+    </g>
+    <g>
+      <rect x="205" y="80" width="150" height="90" rx="11" fill="#16242F" stroke="#2A3D4A"/>
+      <circle cx="230" cy="105" r="13" fill="#5CC6E8"/><text x="230" y="110" text-anchor="middle" fill="#0E1822" font-weight="700" font-size="14">2</text>
+      <text x="255" y="110" fill="#E6EDF2" font-size="14" font-weight="600">Paste comps</text>
+      <text x="223" y="140" fill="#8FA3B0" font-size="12">Select-all on</text>
+      <text x="223" y="157" fill="#8FA3B0" font-size="12">OneHome, paste</text>
+    </g>
+    <g>
+      <rect x="380" y="80" width="150" height="90" rx="11" fill="#16242F" stroke="#2A3D4A"/>
+      <circle cx="405" cy="105" r="13" fill="#6FD3A8"/><text x="405" y="110" text-anchor="middle" fill="#0E1822" font-weight="700" font-size="14">3</text>
+      <text x="430" y="110" fill="#E6EDF2" font-size="14" font-weight="600">Check tiers</text>
+      <text x="398" y="140" fill="#8FA3B0" font-size="12">Green = your tier</text>
+      <text x="398" y="157" fill="#8FA3B0" font-size="12">Amber = off</text>
+    </g>
+    <g>
+      <rect x="555" y="80" width="175" height="90" rx="11" fill="#16242F" stroke="#2C5A6E"/>
+      <circle cx="580" cy="105" r="13" fill="#5CC6E8"/><text x="580" y="110" text-anchor="middle" fill="#0E1822" font-weight="700" font-size="14">4</text>
+      <text x="605" y="110" fill="#5CC6E8" font-size="14" font-weight="600">Read estimate</text>
+      <text x="573" y="140" fill="#8FA3B0" font-size="12">Range + "if it</text>
+      <text x="573" y="157" fill="#8FA3B0" font-size="12">bids like these"</text>
+    </g>
+    <!-- arrows -->
+    <g fill="#5CC6E8">
+      <path d="M183 125 l16 0 m-6 -5 l6 5 -6 5" stroke="#5CC6E8" stroke-width="2" fill="none"/>
+      <path d="M358 125 l16 0 m-6 -5 l6 5 -6 5" stroke="#5CC6E8" stroke-width="2" fill="none"/>
+      <path d="M533 125 l16 0 m-6 -5 l6 5 -6 5" stroke="#5CC6E8" stroke-width="2" fill="none"/>
+    </g>
+  </g>
+  <text x="30" y="205" fill="#5E7585" font-size="11" font-family="IBM Plex Mono,monospace">No login · no backend · saves in your browser</text>
+</svg>
