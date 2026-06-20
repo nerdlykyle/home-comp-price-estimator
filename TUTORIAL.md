@@ -2,7 +2,7 @@
 
 Figure out what a house will *actually sell for* by reading the sold comps, not the list price. Paste comps straight from OneHome, let them sort into condition tiers, and get a price range plus an "if it bids like these" number. No login, no backend — it all runs in your browser.
 
-![How the app flows](./images/flow.svg)
+![How the app flows](./flow.svg)
 
 ---
 
@@ -12,7 +12,7 @@ At the top, fill in the target house: list price (or the "coming soon" price), s
 
 As soon as price and sqft are in, you'll see a line like **`List $/sqft: $258`**. That's just list ÷ sqft, and it's the benchmark the app uses to decide which condition tier your house belongs to. It updates live as you type.
 
-![The house you want](./screenshots/1-house_you_want.png)
+![The house you want](./screenshots/1-house%20you%20want.png)
 
 ---
 
@@ -42,7 +42,7 @@ Long-press a listing, drag the selection handles to cover as many cards as you c
 
 Drop the whole block into the box and tap **Read pasted comps**. You'll get a confirmation like *"Added 11 comps (11 sold, 4 listed-only)."* Missing one, or have an odd format? Use **Add one by hand** below the box.
 
-![Paste comps from OneHome](./screenshots/2-comps_info.png)
+![Paste comps from OneHome](./screenshots/2-comps%20info.png)
 
 ---
 
@@ -59,7 +59,7 @@ It's a default, not a verdict. Tap any checkbox to override. Toured the house an
 
 The number on the right of each comp is its **$/sqft**; the small `+13% vs list` under the address is how far over asking it closed.
 
-![Condition tiers](./screenshots/3-condition_tiers.png)
+![Condition tiers](./screenshots/3-condition%20tiers.png)
 
 ---
 
@@ -73,7 +73,7 @@ Three things to look at:
 
 The sentence underneath translates it into plain English ("plan to compete above the $849,000 ask," and so on).
 
-![The estimate](./screenshots/4-the_estimate.png)
+![The estimate](./screenshots/4-the%20estimate.png)
 
 ---
 
@@ -84,7 +84,7 @@ The sentence underneath translates it into plain English ("plan to compete above
 - **Export as text** copies a plain-text summary to your clipboard (or downloads a `.txt`) as a portable backup.
 - **Clear current** wipes the working target and comps. Your saved estimates are kept.
 
-![Saved estimates](./screenshots/5-saved_estimates.png)
+![Saved estimates](./screenshots/5-saved%20estimates.png)
 
 ---
 
