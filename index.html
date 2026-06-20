@@ -177,6 +177,8 @@
     <div id="saved_body"><div class="empty">Saved runs show up here. They persist on this device.</div></div>
   </div>
 
+  <button class="btn btn-cyan" id="share" style="margin-bottom:10px">Copy share link</button>
+  <div id="share_note" style="display:none;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--cyan);text-align:center;margin-bottom:12px"></div>
   <div class="foot">
     <button class="btn btn-line" id="export">Export as text</button>
     <button class="btn btn-line" id="reset">Clear current</button>
@@ -194,6 +196,30 @@ let saved=[];
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
 function loadState(){ try{ const s=localStorage.getItem(KEY); if(s){state=JSON.parse(s);return true;} }catch(e){} return false; }
 function loadSaved(){ try{ const s=localStorage.getItem(SKEY); saved=s?JSON.parse(s):[]; }catch(e){ saved=[]; } }
+
+/* ---------- share link (run encoded in the URL hash; never hits a server) ---------- */
+function b64urlEncode(str){ return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function b64urlDecode(str){ str=str.replace(/-/g,'+').replace(/_/g,'/'); return decodeURIComponent(escape(atob(str))); }
+function shareLink(){
+  const t=state.target;
+  const payload={ t:[t.addr,t.list,t.sqft,t.bdba],
+    c:state.comps.map(c=>[c.addr,c.sold,c.list,c.sqft,c.beds,c.baths, c.included===undefined?0:(c.included?1:2)]) };
+  return location.origin+location.pathname+'#d='+b64urlEncode(JSON.stringify(payload));
+}
+function loadFromHash(){
+  try{
+    const m=(location.hash||'').match(/[#&]d=([^&]+)/);
+    if(!m)return false;
+    const o=JSON.parse(b64urlDecode(m[1]));
+    if(!o||!o.t||!Array.isArray(o.c))return false;
+    state={ target:{addr:o.t[0]||'',list:o.t[1]||'',sqft:o.t[2]||'',bdba:o.t[3]||''},
+      comps:o.c.map(a=>{ const c={id:uid(),addr:a[0]||'',sold:a[1]||0,list:a[2]||0,sqft:a[3]||0,beds:a[4]||0,baths:a[5]||0};
+        if(a[6]===1)c.included=true; else if(a[6]===2)c.included=false; return c; }) };
+    // strip the hash so a later refresh restores this device's own saved work, and editing behaves normally
+    history.replaceState(null,'',location.origin+location.pathname);
+    return true;
+  }catch(e){ return false; }
+}
 function persistSaved(){ try{ localStorage.setItem(SKEY,JSON.stringify(saved)); }catch(e){} }
 
 /* ---------- helpers ---------- */
@@ -450,6 +476,15 @@ function downloadTxt(txt){
   a.href=u; a.download='comp-estimate.txt'; a.click(); URL.revokeObjectURL(u);
 }
 
+$('share').onclick=()=>{
+  if(!state.comps.length && !state.target.addr){ showShareNote('Add a target or some comps first.'); return; }
+  const url=shareLink();
+  const ok=()=>showShareNote('✓ Link copied. Text it to anyone — it opens with this exact run.');
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(ok,()=>prompt('Copy this share link:',url)); }
+  else prompt('Copy this share link:',url);
+};
+function showShareNote(msg){ const el=$('share_note'); el.textContent=msg; el.style.display='block'; setTimeout(()=>{el.style.display='none';},5000); }
+
 $('reset').onclick=()=>{
   if(!confirm('Clear the current target and comps? Saved estimates are kept.'))return;
   state={target:{addr:'',list:'',sqft:'',bdba:''},comps:[]}; save(); hydrate();
@@ -457,7 +492,7 @@ $('reset').onclick=()=>{
 };
 
 /* ---------- init ---------- */
-loadState();
+if(!loadFromHash()) loadState();
 loadSaved(); hydrate(); renderSaved();
 </script>
 </body>
