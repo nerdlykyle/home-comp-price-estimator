@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comp// — How to use it</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E1822;--panel:#16242F;--line:#2A3D4A;--line2:#35505F;
+    --cyan:#5CC6E8;--cyan-dim:#2C5A6E;--mint:#6FD3A8;--amber:#F0A830;
+    --text:#E6EDF2;--muted:#9DB1BE;--faint:#5E7585;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Inter',system-ui,sans-serif;background:var(--ink);color:var(--text);
+    line-height:1.65;font-size:16px;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:28px 28px;background-position:center;background-attachment:fixed;
+  }
+  body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at top,rgba(14,24,34,.5),var(--ink) 70%);pointer-events:none;z-index:0}
+  .bar{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;
+    max-width:780px;margin:0 auto;padding:18px 20px 0}
+  .brand{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-.02em}
+  .brand .s{color:var(--cyan-dim)}
+  .openapp{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;color:var(--ink);
+    background:var(--cyan);text-decoration:none;padding:8px 14px;border-radius:8px}
+  .wrap{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:14px 20px 80px}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.2em;color:var(--cyan);text-transform:uppercase}
+  h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:38px;letter-spacing:-.02em;line-height:1.08;margin:6px 0 14px}
+  .lede{font-size:17px;color:var(--muted);margin-bottom:8px}
+  h2{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:25px;letter-spacing:-.01em;
+    margin:42px 0 6px;padding-top:26px;border-top:1px solid var(--line)}
+  h2 .num{color:var(--cyan);font-family:'IBM Plex Mono',monospace;font-size:18px;margin-right:10px}
+  h3{font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:24px 0 10px}
+  p{margin:12px 0}
+  ul{margin:12px 0 12px 4px;list-style:none}
+  li{position:relative;padding-left:20px;margin:8px 0}
+  li::before{content:"";position:absolute;left:0;top:11px;width:7px;height:7px;border-radius:2px;background:var(--cyan-dim)}
+  strong{color:var(--text);font-weight:600}
+  .mint{color:var(--mint)}.amber{color:var(--amber)}
+  code{font-family:'IBM Plex Mono',monospace;font-size:.88em;background:#0a1219;border:1px solid var(--line);
+    border-radius:5px;padding:2px 6px;color:var(--cyan)}
+  figure{margin:20px 0}
+  img{display:block;max-width:100%;height:auto;border:1px solid var(--line);border-radius:12px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4)}
+  img.phone{max-width:300px;margin:0 auto}
+  figcaption{font-size:12px;color:var(--faint);font-family:'IBM Plex Mono',monospace;margin-top:8px;text-align:center}
+  .foot{margin-top:48px;padding-top:22px;border-top:1px solid var(--line);font-size:13px;color:var(--faint)}
+  .foot a{color:var(--cyan);text-decoration:none}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <div class="brand">Comp<span class="s">//</span></div>
+    <a class="openapp" href="./index.html">Open the app &rarr;</a>
+  </div>
+  <div class="wrap">
+    <div class="eyebrow">Guide</div>
+    <h1>How to use Comp//</h1>
+    <p class="lede">Figure out what a house will <em>actually sell for</em> by reading the sold comps, not the list price. Paste comps straight from OneHome, let them sort into condition tiers, and get a price range plus an "if it bids like these" number. No login, no backend &mdash; it all runs in your browser.</p>
+
+    <figure><img src="./flow.svg" alt="How the app flows"></figure>
+
+    <h2><span class="num">1</span>Enter the house you want</h2>
+    <p>At the top, fill in the target house: list price (or the "coming soon" price), square footage, and beds / baths.</p>
+    <p>As soon as price and sqft are in, you'll see a line like <code>List $/sqft: $258</code>. That's just list &divide; sqft, and it's the benchmark the app uses to decide which condition tier your house belongs to. It updates live as you type.</p>
+    <figure><img src="./screenshots/1-house%20you%20want.png" alt="The house you want"></figure>
+
+    <h2><span class="num">2</span>Grab the comps from OneHome</h2>
+    <p>You don't need to carefully avoid the photos &mdash; <strong>select everything, and the app throws away the junk</strong> (buttons, image captions, "Compare" links). Pasting into a plain-text box drops all images automatically.</p>
+
+    <h3>On desktop</h3>
+    <p>Your OneHome comps page looks like this:</p>
+    <figure><img src="./screenshots/comps-desktop.png" alt="OneHome comps on desktop"></figure>
+    <p>Click anywhere in the comps list, press <code>Ctrl + A</code> (Windows) or <code>Cmd + A</code> (Mac) to select all, then <code>Ctrl/Cmd + C</code> to copy.</p>
+
+    <h3>On mobile</h3>
+    <p>Same list, one card per column:</p>
+    <figure><img class="phone" src="./screenshots/comps-mobile.png" alt="OneHome comps on mobile"></figure>
+    <p>Long-press a listing, drag the selection handles to cover as many cards as you can, tap <strong>Select All</strong> if it appears, then <strong>Copy</strong>. Don't fight to exclude images &mdash; they won't survive the paste anyway. You can also work in batches: paste a few, hit <em>Read pasted comps</em>, repeat. The app appends new comps and removes duplicates.</p>
+    <p><strong>Easiest of all:</strong> copy from the exported PDF instead of the live page &mdash; PDF text selects clean, especially on a phone.</p>
+
+    <h3>Paste it in</h3>
+    <p>Drop the whole block into the box and tap <strong>Read pasted comps</strong>. You'll get a confirmation like <em>"Added 11 comps (11 sold, 4 listed-only)."</em> Missing one, or have an odd format? Use <strong>Add one by hand</strong> below the box.</p>
+    <figure><img src="./screenshots/2-comps%20info.png" alt="Paste comps from OneHome"></figure>
+
+    <h2><span class="num">3</span>Check the condition tiers</h2>
+    <p>This is the brains of it. Kirkwood homes split hard by condition, not location &mdash; sold prices ran from about $239 to $415 per square foot. That spread is renovation level: older/updated homes versus new-builds and gut-renovations.</p>
+    <p>The app sorts your comps into two bands and decides which one your house belongs to:</p>
+    <ul>
+      <li><strong class="mint">Green is your tier.</strong> Checked by default. These feed the estimate.</li>
+      <li><strong class="amber">Amber is the higher tier.</strong> Unchecked by default &mdash; renovated / new-build comps that would wrongly inflate your number.</li>
+    </ul>
+    <p>It's a default, not a verdict. Tap any checkbox to override. Toured the house and it's nicer than the listing let on? Check a higher-tier comp to test it. A green comp is much bigger than your target (say 4,200 sqft)? Uncheck it to pull the high end down.</p>
+    <p>The number on the right of each comp is its <strong>$/sqft</strong>; the small <code>+13% vs list</code> under the address is how far over asking it closed.</p>
+    <figure><img src="./screenshots/3-condition%20tiers.png" alt="Condition tiers"></figure>
+
+    <h2><span class="num">4</span>Read the estimate</h2>
+    <p>Three things to look at:</p>
+    <ul>
+      <li><strong>Comp range</strong> &mdash; the low-to-high band by square footage.</li>
+      <li><strong>Comp midpoint</strong> &mdash; the big number; the middle of your chosen comps.</li>
+      <li><strong>If it bids like these</strong> &mdash; applies how hard these homes bid over list at closing. In a hot market this can sit well above the midpoint, and that's your signal to plan to compete above ask.</li>
+    </ul>
+    <p>The sentence underneath translates it into plain English ("plan to compete above the $849,000 ask," and so on).</p>
+    <figure><img src="./screenshots/4-the%20estimate.png" alt="The estimate"></figure>
+
+    <h2>Saving and sharing</h2>
+    <ul>
+      <li><strong>Save</strong> (in the estimate card) names a run and files it on the <strong>Saved estimates</strong> shelf. Load or delete any of them later. Saves live in this browser on this device.</li>
+      <li><strong>Copy share link</strong> packs the whole run &mdash; target, comps, and your tier choices &mdash; into a link. Text it to someone and it opens pre-loaded with your exact analysis; they can tweak from there. Nothing is uploaded; the data rides in the link itself.</li>
+      <li><strong>Export as text</strong> copies a plain-text summary to your clipboard (or downloads a <code>.txt</code>) as a portable backup.</li>
+      <li><strong>Clear current</strong> wipes the working target and comps. Your saved estimates are kept.</li>
+    </ul>
+    <figure><img src="./screenshots/5-saved%20estimates.png" alt="Saved estimates"></figure>
+
+    <h2>Good to know</h2>
+    <ul>
+      <li><strong>Is my data private?</strong> Everything stays in your browser. The site is public, but nothing you type is uploaded anywhere.</li>
+      <li><strong>Will my phone and laptop share saves?</strong> No &mdash; saves are per-device (that's the trade for free, no backend). Use the share link to hand a run between devices.</li>
+      <li><strong>Pure comps.</strong> The estimate reads tiers and over-list behavior. It can't see a specific house's lot, finishes, or things like railroad-track proximity &mdash; that judgment stays with you.</li>
+    </ul>
+
+    <div class="foot">Built as a single static <code>index.html</code>. <a href="./index.html">Open the app &rarr;</a></div>
+  </div>
+</body>
+</html>
