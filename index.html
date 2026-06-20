@@ -190,26 +190,6 @@ const KEY='comp_state_v1', SKEY='comp_saved_v1';
 let state={target:{addr:'',list:'',sqft:'',bdba:''},comps:[]};
 let saved=[];
 
-function SEED(){
-  const c=(addr,sold,list,sqft,beds,baths)=>({id:'s'+addr.replace(/\W/g,'').slice(0,8),addr,sold,list,sqft,beds,baths});
-  return {target:{addr:'615 Meadowridge Lane',list:'849000',sqft:'3296',bdba:'5 / 4'},comps:[
-    c('320 Bogey Lane',1428000,1399900,3534,5,4),
-    c('906 N Woodlawn Avenue',1200000,1200000,3584,5,5),
-    c('582 Drury Lane',1167400,1167400,3327,5,5),
-    c('907 N Taylor Avenue',908000,799900,3209,4,4),
-    c('641 Brookhaven Court',1697063,1595000,4085,5,5),
-    c('734 Fuhrmann Terr',995000,985000,4026,4,4),
-    c('122 Morningside Drive',1150500,1149000,3329,5,5),
-    c('630 Norfolk Drive',850000,839900,3233,4,4),
-    c('1012 N Taylor Avenue',865000,724900,3618,5,3),
-    c('450 Woodlawn Grove Lane',1276000,1095000,4222,4,5),
-    c('450 Bogey Lane',1200000,989000,3285,4,4),
-    c('333 Par Lane',0,1150000,3421,5,4),
-    c('442 Woodlawn Grove Lane',0,974400,3903,4,5),
-    c('686 Brownell Avenue',0,1620000,4242,5,5)
-  ]};
-}
-
 /* ---------- storage (localStorage; persists on a real domain) ---------- */
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
 function loadState(){ try{ const s=localStorage.getItem(KEY); if(s){state=JSON.parse(s);return true;} }catch(e){} return false; }
@@ -477,7 +457,7 @@ $('reset').onclick=()=>{
 };
 
 /* ---------- init ---------- */
-if(!loadState())state=SEED();
+loadState();
 loadSaved(); hydrate(); renderSaved();
 </script>
 </body>
