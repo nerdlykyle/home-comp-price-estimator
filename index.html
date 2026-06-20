@@ -229,43 +229,55 @@ function pctile(sorted,p){
 const median=a=>pctile([...a].sort((x,y)=>x-y),0.5);
 const uid=()=>'c'+Date.now()+Math.random().toString(36).slice(2,5);
 
-/* ---------- paste parser (OneHome format) ---------- */
+/* ---------- paste parser (handles OneHome's real copy format) ----------
+   Real format puts the status badge ABOVE the price, splits beds/baths/sqft
+   across separate lines (5 / bd / 4 / ba / 3,296 sqft), and interleaves
+   button labels and image captions. This walks line by line and is tolerant
+   of all that, plus the one-line PDF format as a fallback. */
 function parsePaste(raw){
   const txt=raw.replace(/\u00B7|\u2022|\uFF65|\u2027/g,'·').replace(/\r/g,'');
   const lines=txt.split('\n').map(l=>l.trim()).filter(l=>l.length);
-  const priceRe=/^\$\s*([\d,]+)/;
+  const priceAnyRe=/^\$\s*([\d,]+)/;
   const listedRe=/listed\s*for[:\s]*\$\s*([\d,]+)/i;
-  const bbRe=/(\d+)\s*bd[^0-9]*?(\d+(?:\.\d+)?)\s*ba[^0-9]*?([\d,]+)\s*sq\s*?ft/i;
-  const mlsRe=/mls\s*#?\s*([A-Z0-9]+)/i;
+  const comboBB=/(\d+)\s*bd[^0-9]*?(\d+(?:\.\d+)?)\s*ba[^0-9]*?([\d,]+)\s*sq\s*?ft/i;
+  const sqftRe=/^([\d,]+)\s*sq\s*?ft\b/i;
+  const intRe=/^(\d{1,2})$/;
   const cityRe=/,\s*(MO|missouri)\s+\d{5}/i;
-  const statusRe=/\b(sold|pending|for sale|coming soon|under contract|contingent|active)\b/i;
-  const recs=[]; let cur=null,lastLine='';
-  const fresh=()=>({headline:null,list:0,addr:'',bb:null,status:''});
-  const flush=()=>{ if(cur&&cur.bb)recs.push(cur); cur=null; };
+  const badgeRe=/^(sold|pending|for sale|coming soon|under contract|contingent|active)\b/i;
+  const mlsRe=/^mls\s*#/i;
+  const junkRe=/^(dislike|favorite|compare|single family residence|null|bd|ba|map|comps?)$/i;
+  const recs=[]; let cur=null,pendingStatus='',pendingNum=null,lastMeaningful='';
+  const fresh=()=>({headline:null,list:0,addr:'',beds:0,baths:0,sqft:0,status:''});
+  const complete=r=>r&&r.headline!=null&&r.sqft>0;
+  const flush=()=>{ if(complete(cur))recs.push(cur); cur=null; };
   for(const ln of lines){
-    const isListed=listedRe.test(ln);
-    const pm=ln.match(priceRe);
-    if(pm&&!isListed&&!/\/mo|estimated/i.test(ln)){
-      if(cur&&cur.headline!=null&&cur.bb)flush();
+    if(badgeRe.test(ln)&&ln.length<28){ pendingStatus=ln.match(badgeRe)[1].toLowerCase(); continue; }
+    if(listedRe.test(ln)){ if(cur)cur.list=intNum(ln.match(listedRe)[1]); continue; }
+    const pm=ln.match(priceAnyRe);
+    if(pm&&!/\/mo|estimated/i.test(ln)){
+      if(complete(cur))flush();
       if(!cur)cur=fresh();
-      if(cur.headline==null)cur.headline=intNum(pm[1]);
-      else{ flush(); cur=fresh(); cur.headline=intNum(pm[1]); }
-      lastLine=ln; continue;
+      if(cur.headline==null){ cur.headline=intNum(pm[1]); cur.status=pendingStatus; pendingStatus=''; }
+      else{ flush(); cur=fresh(); cur.headline=intNum(pm[1]); cur.status=pendingStatus; pendingStatus=''; }
+      lastMeaningful=ln; continue;
     }
     if(!cur)cur=fresh();
-    if(isListed){ cur.list=intNum(ln.match(listedRe)[1]); lastLine=ln; continue; }
-    const bm=ln.match(bbRe);
-    if(bm){ if(cur.bb){ flush(); cur=fresh(); } cur.bb={beds:intNum(bm[1]),baths:parseFloat(bm[2])||0,sqft:intNum(bm[3])}; lastLine=ln; continue; }
-    if(mlsRe.test(ln)){ lastLine=ln; continue; }
-    const sm=ln.match(statusRe); if(sm&&!cur.status)cur.status=sm[1].toLowerCase();
-    if(cityRe.test(ln)){ if(lastLine&&!cityRe.test(lastLine)&&!priceRe.test(lastLine)&&!/single family|residence|listed for/i.test(lastLine))cur.addr=lastLine; }
-    lastLine=ln;
+    const cb=ln.match(comboBB);
+    if(cb){ cur.beds=intNum(cb[1]); cur.baths=parseFloat(cb[2])||0; cur.sqft=intNum(cb[3]); lastMeaningful=ln; continue; }
+    const sq=ln.match(sqftRe);
+    if(sq){ cur.sqft=intNum(sq[1]); lastMeaningful=ln; continue; }
+    if(intRe.test(ln)){ pendingNum=intNum(ln); lastMeaningful=ln; continue; }
+    if(/^bd$/i.test(ln)){ if(pendingNum!=null)cur.beds=pendingNum; pendingNum=null; continue; }
+    if(/^ba$/i.test(ln)){ if(pendingNum!=null)cur.baths=pendingNum; pendingNum=null; continue; }
+    if(cityRe.test(ln)){ if(lastMeaningful&&!cityRe.test(lastMeaningful)&&!priceAnyRe.test(lastMeaningful)&&!/single family|residence|listed for/i.test(lastMeaningful))cur.addr=lastMeaningful; lastMeaningful=ln; continue; }
+    if(mlsRe.test(ln)||junkRe.test(ln))continue;
+    lastMeaningful=ln;
   }
   flush();
   return recs.map(r=>{
     const isSold=/sold/.test(r.status);
     return {addr:r.addr, status:r.status, sold:isSold?r.headline:0,
-      list:r.list||(isSold?0:r.headline), sqft:r.bb.sqft, beds:r.bb.beds, baths:r.bb.baths};
+      list:r.list||(isSold?0:r.headline), sqft:r.sqft, beds:r.beds, baths:r.baths};
   });
 }
 
@@ -410,8 +422,10 @@ $('parse_btn').onclick=()=>{
   try{ parsed=parsePaste(raw); }catch(e){ setStatus('err','Couldn\'t read that. Try the by-hand form below.'); return; }
   if(!parsed.length){ setStatus('err','No comps found in that text. Make sure you copied the listing rows (price, address, sqft, status).'); return; }
   let added=0;
+  const tAddr=(state.target.addr||'').trim().toLowerCase();
   parsed.forEach(o=>{
     if(!o.sqft)return;
+    if(o.addr&&tAddr&&o.addr.toLowerCase()===tAddr)return; // that's the target, not a comp
     if(o.addr&&state.comps.some(c=>c.addr&&c.addr.toLowerCase()===o.addr.toLowerCase()))return;
     state.comps.push({id:uid(),addr:o.addr||'',sold:o.sold,list:o.list,sqft:o.sqft,beds:o.beds,baths:o.baths});
     added++;
