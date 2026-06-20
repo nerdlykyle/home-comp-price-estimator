@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comp — Kirkwood comp analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E1822; --panel:#16242F; --panel2:#1C2E3A;
+    --line:#2A3D4A; --line2:#35505F;
+    --cyan:#5CC6E8; --cyan-dim:#2C5A6E;
+    --mint:#6FD3A8; --amber:#F0A830;
+    --text:#E6EDF2; --muted:#8FA3B0; --faint:#5E7585;
+    --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Inter',system-ui,sans-serif;background:var(--ink);color:var(--text);
+    line-height:1.5;min-height:100vh;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:28px 28px;background-position:center;background-attachment:fixed;
+  }
+  body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at top,rgba(14,24,34,.4),var(--ink) 70%);pointer-events:none;z-index:0}
+  .wrap{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:22px 16px 80px}
+
+  header{margin-bottom:22px}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.22em;color:var(--cyan);text-transform:uppercase}
+  h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:30px;letter-spacing:-.02em;line-height:1.05;margin-top:4px}
+  h1 .slash{color:var(--cyan-dim)}
+  .tag{font-size:13px;color:var(--muted);margin-top:6px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .sec-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);display:flex;align-items:center;gap:8px;margin-bottom:14px}
+  .sec-label::before{content:"";width:18px;height:1px;background:var(--line2)}
+
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
+  input,textarea{width:100%;background:var(--ink);border:1px solid var(--line2);border-radius:9px;color:var(--text);
+    font-family:'IBM Plex Mono',monospace;font-size:15px;padding:10px 12px;outline:none;transition:border-color .15s}
+  input:focus,textarea:focus{border-color:var(--cyan)}
+  input::placeholder,textarea::placeholder{color:var(--faint)}
+  textarea{min-height:120px;resize:vertical;line-height:1.45;font-size:13px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px}
+  .field{margin-bottom:12px}.field:last-child{margin-bottom:0}
+
+  .live{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--cyan);margin-top:10px}
+  .live b{color:var(--text);font-weight:600}
+  .hint{font-size:12px;color:var(--muted);margin:8px 0 12px;line-height:1.5}
+
+  .btn{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;border:none;border-radius:9px;padding:11px 16px;cursor:pointer;transition:.15s;width:100%}
+  .btn-line{background:transparent;border:1px solid var(--line2);color:var(--text)}
+  .btn-line:hover{border-color:var(--cyan);color:var(--cyan)}
+  .btn-cyan{background:var(--cyan);color:var(--ink)}
+  .btn-cyan:hover{filter:brightness(1.08)}
+  .or{text-align:center;font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.15em;margin:14px 0}
+
+  .status{font-family:'IBM Plex Mono',monospace;font-size:13px;padding:12px;border-radius:9px;margin-top:12px}
+  .status.work{background:rgba(92,198,232,.08);border:1px solid var(--cyan-dim);color:var(--cyan)}
+  .status.err{background:rgba(240,168,48,.08);border:1px solid #6e561e;color:var(--amber)}
+
+  .tier-head{display:flex;justify-content:space-between;align-items:baseline;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:18px 0 10px}
+  .tier-head.match{color:var(--mint)}.tier-head.off{color:var(--amber)}
+  .tier-head .n{color:var(--faint);letter-spacing:0}
+  .comp{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--line)}
+  .comp:last-child{border-bottom:none}
+  .cbx{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--line2);flex-shrink:0;cursor:pointer;position:relative;transition:.15s;background:var(--ink)}
+  .cbx.on{background:var(--mint);border-color:var(--mint)}
+  .cbx.on.off-tier{background:var(--amber);border-color:var(--amber)}
+  .cbx.on::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid var(--ink);border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .comp-body{flex:1;min-width:0}
+  .comp-addr{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .comp-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--faint);margin-top:2px}
+  .bar-track{height:5px;background:var(--ink);border-radius:3px;margin-top:6px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:3px}
+  .comp.muted{opacity:.45}
+  .comp-psf{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;width:64px;text-align:right;flex-shrink:0}
+  .del{color:var(--faint);font-size:18px;cursor:pointer;padding:0 2px;flex-shrink:0}
+  .del:hover{color:var(--amber)}
+  .context-note{font-size:11px;color:var(--faint);font-style:italic;margin-top:14px}
+
+  .est{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--cyan-dim)}
+  .range-big{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;color:var(--muted);text-align:center;margin-bottom:4px}
+  .mid{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:38px;text-align:center;letter-spacing:-.02em;color:var(--cyan)}
+  .mid-lab{text-align:center;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.15em;font-family:'IBM Plex Mono',monospace;margin-bottom:18px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+  .stat{background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:12px}
+  .stat .k{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.1em;font-family:'IBM Plex Mono',monospace}
+  .stat .v{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:19px;margin-top:3px}
+  .stat .v.mint{color:var(--mint)}.stat .v.amber{color:var(--amber)}
+  .read{font-size:13px;color:var(--text);background:var(--ink);border-left:2px solid var(--cyan);border-radius:0 8px 8px 0;padding:11px 13px;line-height:1.55}
+  .read b{color:var(--cyan)}
+  .save-row{display:flex;gap:10px;margin-top:16px}
+  .save-row input{flex:1}.save-row .btn{width:auto;white-space:nowrap}
+
+  .saved-item{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .saved-item:last-child{border-bottom:none}
+  .saved-body{flex:1;min-width:0}
+  .saved-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .saved-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--faint);margin-top:2px}
+  .saved-act{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;color:var(--cyan);cursor:pointer;flex-shrink:0}
+  .saved-act:hover{text-decoration:underline}
+
+  .empty{text-align:center;color:var(--faint);font-size:13px;padding:24px 10px}
+  .foot{display:flex;gap:10px;margin-top:6px}.foot .btn{flex:1}
+  .disclaim{font-size:11px;color:var(--faint);text-align:center;margin-top:18px;line-height:1.5}
+  .add-form{display:none;margin-top:12px}.add-form.show{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Kirkwood · 63122</div>
+    <h1>Comp<span class="slash">//</span></h1>
+    <div class="tag">What a house actually sells for — read from the comps, not the list price.</div>
+  </header>
+
+  <!-- TARGET -->
+  <div class="card">
+    <div class="sec-label">The house you want</div>
+    <div class="field"><label>Address</label><input id="t_addr" placeholder="615 Meadowridge Lane"></div>
+    <div class="grid3">
+      <div class="field"><label>List price</label><input id="t_list" inputmode="numeric" placeholder="849000"></div>
+      <div class="field"><label>Sqft</label><input id="t_sqft" inputmode="numeric" placeholder="3296"></div>
+      <div class="field"><label>Bd / Ba</label><input id="t_bdba" placeholder="5 / 4"></div>
+    </div>
+    <div class="live" id="t_live">—</div>
+  </div>
+
+  <!-- COMPS -->
+  <div class="card">
+    <div class="sec-label">Comps</div>
+    <label>Paste from OneHome</label>
+    <div class="hint">Open your comps list in OneHome, select the listing rows, copy, and paste the whole block here. I'll pull out price, sqft, beds, baths, and sold-vs-list for each.</div>
+    <textarea id="paste" placeholder="$1,428,000&#10;Listed For: $1,399,900&#10;320 Bogey Lane&#10;Kirkwood, MO 63122&#10;5bd · 4ba · 3,534 sqft&#10;Sold&#10;…"></textarea>
+    <button class="btn btn-cyan" id="parse_btn" style="margin-top:12px">Read pasted comps</button>
+    <div id="parse_status"></div>
+    <div class="or">or</div>
+    <button class="btn btn-line" id="add_toggle">Add one by hand</button>
+    <div class="add-form" id="add_form">
+      <div class="field" style="margin-top:12px"><label>Address</label><input id="m_addr" placeholder="320 Bogey Lane"></div>
+      <div class="grid2">
+        <div class="field"><label>Sold price</label><input id="m_sold" inputmode="numeric" placeholder="1428000"></div>
+        <div class="field"><label>List price</label><input id="m_list" inputmode="numeric" placeholder="1399900"></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label>Sqft</label><input id="m_sqft" inputmode="numeric" placeholder="3534"></div>
+        <div class="field"><label>Beds</label><input id="m_bd" inputmode="numeric" placeholder="5"></div>
+        <div class="field"><label>Baths</label><input id="m_ba" inputmode="numeric" placeholder="4"></div>
+      </div>
+      <button class="btn btn-cyan" id="m_save">Add comp</button>
+    </div>
+  </div>
+
+  <!-- TIERS -->
+  <div class="card">
+    <div class="sec-label">Condition tiers</div>
+    <div id="tier_body"><div class="empty">Paste comps above and they'll sort into tiers here. Checked comps feed the estimate.</div></div>
+  </div>
+
+  <!-- ESTIMATE -->
+  <div class="card est">
+    <div class="sec-label" style="color:var(--cyan)">The estimate</div>
+    <div id="est_body"><div class="empty">Pick at least two comps to see a number.</div></div>
+    <div class="save-row">
+      <input id="save_name" placeholder="Name this estimate">
+      <button class="btn btn-cyan" id="save_est">Save</button>
+    </div>
+  </div>
+
+  <!-- SAVED -->
+  <div class="card">
+    <div class="sec-label">Saved estimates</div>
+    <div id="saved_body"><div class="empty">Saved runs show up here. They persist on this device.</div></div>
+  </div>
+
+  <div class="foot">
+    <button class="btn btn-line" id="export">Export as text</button>
+    <button class="btn btn-line" id="reset">Clear current</button>
+  </div>
+  <div class="disclaim">Pure comps, no fudge factors. The estimate reads condition tiers and how these homes behaved against their list price. It can't see the house's lot, finishes, or the railroad — that read stays with you.</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const KEY='comp_state_v1', SKEY='comp_saved_v1';
+let state={target:{addr:'',list:'',sqft:'',bdba:''},comps:[]};
+let saved=[];
+
+function SEED(){
+  const c=(addr,sold,list,sqft,beds,baths)=>({id:'s'+addr.replace(/\W/g,'').slice(0,8),addr,sold,list,sqft,beds,baths});
+  return {target:{addr:'615 Meadowridge Lane',list:'849000',sqft:'3296',bdba:'5 / 4'},comps:[
+    c('320 Bogey Lane',1428000,1399900,3534,5,4),
+    c('906 N Woodlawn Avenue',1200000,1200000,3584,5,5),
+    c('582 Drury Lane',1167400,1167400,3327,5,5),
+    c('907 N Taylor Avenue',908000,799900,3209,4,4),
+    c('641 Brookhaven Court',1697063,1595000,4085,5,5),
+    c('734 Fuhrmann Terr',995000,985000,4026,4,4),
+    c('122 Morningside Drive',1150500,1149000,3329,5,5),
+    c('630 Norfolk Drive',850000,839900,3233,4,4),
+    c('1012 N Taylor Avenue',865000,724900,3618,5,3),
+    c('450 Woodlawn Grove Lane',1276000,1095000,4222,4,5),
+    c('450 Bogey Lane',1200000,989000,3285,4,4),
+    c('333 Par Lane',0,1150000,3421,5,4),
+    c('442 Woodlawn Grove Lane',0,974400,3903,4,5),
+    c('686 Brownell Avenue',0,1620000,4242,5,5)
+  ]};
+}
+
+/* ---------- storage (localStorage; persists on a real domain) ---------- */
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
+function loadState(){ try{ const s=localStorage.getItem(KEY); if(s){state=JSON.parse(s);return true;} }catch(e){} return false; }
+function loadSaved(){ try{ const s=localStorage.getItem(SKEY); saved=s?JSON.parse(s):[]; }catch(e){ saved=[]; } }
+function persistSaved(){ try{ localStorage.setItem(SKEY,JSON.stringify(saved)); }catch(e){} }
+
+/* ---------- helpers ---------- */
+const num=v=>{const n=parseFloat(String(v).replace(/[^0-9.]/g,''));return isFinite(n)?n:0;};
+const intNum=s=>parseInt(String(s).replace(/[^0-9]/g,''),10)||0;
+const money=n=>'$'+Math.round(n).toLocaleString('en-US');
+const money1k=n=>'$'+(Math.round(n/1000)*1000).toLocaleString('en-US');
+function pctile(sorted,p){
+  if(!sorted.length)return 0;
+  const i=(sorted.length-1)*p, lo=Math.floor(i), hi=Math.ceil(i);
+  return lo===hi?sorted[lo]:sorted[lo]+(sorted[hi]-sorted[lo])*(i-lo);
+}
+const median=a=>pctile([...a].sort((x,y)=>x-y),0.5);
+const uid=()=>'c'+Date.now()+Math.random().toString(36).slice(2,5);
+
+/* ---------- paste parser (OneHome format) ---------- */
+function parsePaste(raw){
+  const txt=raw.replace(/\u00B7|\u2022|\uFF65|\u2027/g,'·').replace(/\r/g,'');
+  const lines=txt.split('\n').map(l=>l.trim()).filter(l=>l.length);
+  const priceRe=/^\$\s*([\d,]+)/;
+  const listedRe=/listed\s*for[:\s]*\$\s*([\d,]+)/i;
+  const bbRe=/(\d+)\s*bd[^0-9]*?(\d+(?:\.\d+)?)\s*ba[^0-9]*?([\d,]+)\s*sq\s*?ft/i;
+  const mlsRe=/mls\s*#?\s*([A-Z0-9]+)/i;
+  const cityRe=/,\s*(MO|missouri)\s+\d{5}/i;
+  const statusRe=/\b(sold|pending|for sale|coming soon|under contract|contingent|active)\b/i;
+  const recs=[]; let cur=null,lastLine='';
+  const fresh=()=>({headline:null,list:0,addr:'',bb:null,status:''});
+  const flush=()=>{ if(cur&&cur.bb)recs.push(cur); cur=null; };
+  for(const ln of lines){
+    const isListed=listedRe.test(ln);
+    const pm=ln.match(priceRe);
+    if(pm&&!isListed&&!/\/mo|estimated/i.test(ln)){
+      if(cur&&cur.headline!=null&&cur.bb)flush();
+      if(!cur)cur=fresh();
+      if(cur.headline==null)cur.headline=intNum(pm[1]);
+      else{ flush(); cur=fresh(); cur.headline=intNum(pm[1]); }
+      lastLine=ln; continue;
+    }
+    if(!cur)cur=fresh();
+    if(isListed){ cur.list=intNum(ln.match(listedRe)[1]); lastLine=ln; continue; }
+    const bm=ln.match(bbRe);
+    if(bm){ if(cur.bb){ flush(); cur=fresh(); } cur.bb={beds:intNum(bm[1]),baths:parseFloat(bm[2])||0,sqft:intNum(bm[3])}; lastLine=ln; continue; }
+    if(mlsRe.test(ln)){ lastLine=ln; continue; }
+    const sm=ln.match(statusRe); if(sm&&!cur.status)cur.status=sm[1].toLowerCase();
+    if(cityRe.test(ln)){ if(lastLine&&!cityRe.test(lastLine)&&!priceRe.test(lastLine)&&!/single family|residence|listed for/i.test(lastLine))cur.addr=lastLine; }
+    lastLine=ln;
+  }
+  flush();
+  return recs.map(r=>{
+    const isSold=/sold/.test(r.status);
+    return {addr:r.addr, status:r.status, sold:isSold?r.headline:0,
+      list:r.list||(isSold?0:r.headline), sqft:r.bb.sqft, beds:r.bb.beds, baths:r.bb.baths};
+  });
+}
+
+/* ---------- tiering ---------- */
+function soldComps(){return state.comps.filter(c=>c.sold>0&&c.sqft>0);}
+function computeTiers(){
+  const sc=soldComps().map(c=>({...c,psf:c.sold/c.sqft})).sort((a,b)=>a.psf-b.psf);
+  if(sc.length<4){ sc.forEach(c=>c.tier=0); return {comps:sc,split:null}; }
+  let best=-1,gap=-1;
+  for(let i=2;i<=sc.length-2;i++){ const g=sc[i].psf/sc[i-1].psf; if(g>gap){gap=g;best=i;} }
+  const splitVal=(sc[best-1].psf+sc[best].psf)/2;
+  sc.forEach((c,i)=>c.tier=i<best?0:1);
+  return {comps:sc,split:splitVal};
+}
+function targetTier(tiers){
+  const sqft=num(state.target.sqft), list=num(state.target.list);
+  if(tiers.split==null)return 0;
+  const tpsf=(sqft&&list)?list/sqft:median(tiers.comps.map(c=>c.psf));
+  return tpsf<tiers.split?0:1;
+}
+function included(){
+  const tiers=computeTiers(), tt=targetTier(tiers);
+  return tiers.comps.filter(c=>{
+    const def=tiers.split==null?true:(c.tier===tt);
+    return c.included===undefined?def:c.included;
+  });
+}
+function computeEstimate(){
+  const inc=included(), sqft=num(state.target.sqft), list=num(state.target.list);
+  if(inc.length<2||!sqft)return null;
+  const psfs=inc.map(c=>c.psf).sort((a,b)=>a-b);
+  const withList=inc.filter(c=>c.list>0);
+  let expect=null,medRatio=null;
+  if(withList.length&&list){ medRatio=median(withList.map(c=>c.sold/c.list)); expect=list*medRatio; }
+  return {low:pctile(psfs,.25)*sqft, mid:median(psfs)*sqft, high:pctile(psfs,.75)*sqft, expect, medRatio, n:inc.length, list};
+}
+
+/* ---------- render ---------- */
+function hydrate(){
+  $('t_addr').value=state.target.addr; $('t_list').value=state.target.list;
+  $('t_sqft').value=state.target.sqft; $('t_bdba').value=state.target.bdba;
+  renderAll();
+}
+function renderAll(){ renderLive(); renderTiers(); renderEstimate(); }
+function renderLive(){
+  const sqft=num(state.target.sqft), list=num(state.target.list);
+  $('t_live').innerHTML=(sqft&&list)?`List $/sqft: <b>$${Math.round(list/sqft)}</b> — your benchmark for sorting comps.`:'—';
+}
+function renderTiers(){
+  const sc=soldComps(), ctx=state.comps.filter(c=>!(c.sold>0&&c.sqft>0));
+  if(!sc.length){ $('tier_body').innerHTML='<div class="empty">Add comps with a sold price + sqft and they\'ll sort into tiers here.</div>'; return; }
+  const tiers=computeTiers(), tt=targetTier(tiers);
+  const maxPsf=Math.max(...tiers.comps.map(c=>c.psf));
+  const groups=tiers.split==null?[tiers.comps]:[tiers.comps.filter(c=>c.tier===0),tiers.comps.filter(c=>c.tier===1)];
+  const labels=['Comparable tier (older / updated)','Higher tier (renovated / new build)'];
+  let html='';
+  groups.forEach((g,gi)=>{
+    if(!g.length)return;
+    const isMatch=tiers.split==null?true:(gi===tt);
+    html+=tiers.split==null
+      ? `<div class="tier-head match"><span>All comps</span><span class="n">${g.length}</span></div>`
+      : `<div class="tier-head ${isMatch?'match':'off'}"><span>${labels[gi]}${isMatch?' · your tier':''}</span><span class="n">${g.length}</span></div>`;
+    g.forEach(c=>{
+      const checked=c.included===undefined?isMatch:c.included;
+      const w=Math.round(c.psf/maxPsf*100);
+      html+=`<div class="comp ${checked?'':'muted'}">
+        <div class="cbx ${checked?'on':''} ${isMatch?'':'off-tier'}" data-id="${c.id}"></div>
+        <div class="comp-body">
+          <div class="comp-addr">${c.addr||'(no address)'}</div>
+          <div class="comp-meta">${money1k(c.sold)} · ${c.sqft.toLocaleString()} sqft${c.list>0?' · '+(c.sold>=c.list?'+':'')+Math.round((c.sold/c.list-1)*100)+'% vs list':''}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${isMatch?'var(--mint)':'var(--amber)'}"></div></div>
+        </div>
+        <div class="comp-psf">$${Math.round(c.psf)}<span style="display:block;font-size:9px;color:var(--faint);font-weight:400;letter-spacing:.04em">/sqft</span></div>
+        <div class="del" data-del="${c.id}">×</div>
+      </div>`;
+    });
+  });
+  if(ctx.length)html+='<div class="context-note">Not used in the math (no sold price): '+ctx.map(c=>c.addr||'?').join(', ')+'. <span data-clearctx style="cursor:pointer;text-decoration:underline">clear</span></div>';
+  $('tier_body').innerHTML=html;
+  $('tier_body').querySelectorAll('.cbx').forEach(el=>el.onclick=()=>{
+    const c=state.comps.find(x=>x.id===el.dataset.id);
+    c.included=!el.classList.contains('on'); save(); renderAll();
+  });
+  $('tier_body').querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{
+    state.comps=state.comps.filter(x=>x.id!==el.dataset.del); save(); renderAll();
+  });
+  const cc=$('tier_body').querySelector('[data-clearctx]');
+  if(cc)cc.onclick=()=>{ state.comps=state.comps.filter(c=>c.sold>0&&c.sqft>0); save(); renderAll(); };
+}
+function renderEstimate(){
+  const e=computeEstimate();
+  if(!e){ $('est_body').innerHTML='<div class="empty">'+(!num(state.target.sqft)?'Enter the target sqft':'Pick at least two comps')+' to see a number.</div>'; return; }
+  const list=e.list;
+  let read='';
+  if(e.expect){
+    const over=Math.round((e.medRatio-1)*100);
+    const verb=over>2?`bid <b>${over}% over list</b> on average`:over<-2?`settle <b>${Math.abs(over)}% under list</b>`:'land <b>right at list</b>';
+    read=`Your ${e.n} chosen comps sold for a midpoint of <b>${money1k(e.mid)}</b> by square footage. At closing they tended to ${verb} — pointing at roughly <b>${money1k(e.expect)}</b> for this one. `;
+    if(list){ const gap=Math.round((Math.max(e.mid,e.expect)/list-1)*100); read+=gap>3?`Plan to compete above the ${money1k(list)} ask.`:`The ${money1k(list)} ask looks fair for its tier.`; }
+  }else{
+    read=`Your ${e.n} chosen comps put the midpoint at <b>${money1k(e.mid)}</b> by square footage. Add list prices to your comps to also read the over-list behavior.`;
+  }
+  $('est_body').innerHTML=`
+    <div class="range-big">${money1k(e.low)} &nbsp;—&nbsp; ${money1k(e.high)}</div>
+    <div class="mid">${money1k(e.mid)}</div>
+    <div class="mid-lab">comp midpoint · ${e.n} comps</div>
+    <div class="row2">
+      <div class="stat"><div class="k">Comp range</div><div class="v">${money1k(e.low)}–${money1k(e.high).replace('$','')}</div></div>
+      <div class="stat"><div class="k">If it bids like these</div><div class="v ${e.expect&&e.expect>list?'amber':'mint'}">${e.expect?money1k(e.expect):'—'}</div></div>
+    </div>
+    <div class="read">${read}</div>`;
+}
+function renderSaved(){
+  if(!saved.length){ $('saved_body').innerHTML='<div class="empty">Saved runs show up here. They persist on this device.</div>'; return; }
+  $('saved_body').innerHTML=saved.map(s=>`
+    <div class="saved-item">
+      <div class="saved-body">
+        <div class="saved-name">${s.name}</div>
+        <div class="saved-meta">${s.summary} · ${new Date(s.at).toLocaleDateString()}</div>
+      </div>
+      <div class="saved-act" data-load="${s.id}">Load</div>
+      <div class="del" data-delsaved="${s.id}">×</div>
+    </div>`).join('');
+  $('saved_body').querySelectorAll('[data-load]').forEach(el=>el.onclick=()=>{
+    const s=saved.find(x=>x.id===el.dataset.load); if(!s)return;
+    state=JSON.parse(JSON.stringify(s.state)); save(); hydrate();
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+  $('saved_body').querySelectorAll('[data-delsaved]').forEach(el=>el.onclick=()=>{
+    saved=saved.filter(x=>x.id!==el.dataset.delsaved); persistSaved(); renderSaved();
+  });
+}
+
+/* ---------- inputs ---------- */
+['addr','list','sqft','bdba'].forEach(k=>$('t_'+k).addEventListener('input',e=>{state.target[k]=e.target.value;save();renderAll();}));
+function setStatus(cls,msg){ $('parse_status').innerHTML=`<div class="status ${cls}">${msg}</div>`; }
+
+$('parse_btn').onclick=()=>{
+  const raw=$('paste').value;
+  if(!raw.trim()){ setStatus('err','Paste some comp text first.'); return; }
+  let parsed=[];
+  try{ parsed=parsePaste(raw); }catch(e){ setStatus('err','Couldn\'t read that. Try the by-hand form below.'); return; }
+  if(!parsed.length){ setStatus('err','No comps found in that text. Make sure you copied the listing rows (price, address, sqft, status).'); return; }
+  let added=0;
+  parsed.forEach(o=>{
+    if(!o.sqft)return;
+    if(o.addr&&state.comps.some(c=>c.addr&&c.addr.toLowerCase()===o.addr.toLowerCase()))return;
+    state.comps.push({id:uid(),addr:o.addr||'',sold:o.sold,list:o.list,sqft:o.sqft,beds:o.beds,baths:o.baths});
+    added++;
+  });
+  const soldN=parsed.filter(o=>o.sold>0).length;
+  $('paste').value=''; save(); renderAll();
+  setStatus('work',`✓ Added ${added} comp${added===1?'':'s'} (${soldN} sold, ${added-soldN} listed-only). Check the tiers below — delete any that look off.`);
+  setTimeout(()=>$('parse_status').innerHTML='',7000);
+};
+
+$('add_toggle').onclick=()=>$('add_form').classList.toggle('show');
+$('m_save').onclick=()=>{
+  const sold=num($('m_sold').value), sqft=num($('m_sqft').value);
+  if(!sold||!sqft){ alert('Need at least a sold price and sqft.'); return; }
+  state.comps.push({id:uid(),addr:$('m_addr').value.trim(),sold,list:num($('m_list').value),sqft,beds:num($('m_bd').value),baths:num($('m_ba').value)});
+  ['m_addr','m_sold','m_list','m_sqft','m_bd','m_ba'].forEach(id=>$(id).value='');
+  $('add_form').classList.remove('show'); save(); renderAll();
+};
+
+$('save_est').onclick=()=>{
+  const e=computeEstimate();
+  if(!e){ alert('Build an estimate first — target sqft and at least two comps.'); return; }
+  const name=($('save_name').value.trim())||state.target.addr||'Untitled estimate';
+  const summary=`${money1k(e.mid)} mid${e.expect?` · ${money1k(e.expect)} if bid up`:''} · ${e.n} comps`;
+  saved.unshift({id:uid(),name,at:Date.now(),summary,state:JSON.parse(JSON.stringify(state))});
+  persistSaved(); renderSaved(); $('save_name').value='';
+};
+
+$('export').onclick=()=>{
+  const t=state.target, L=['COMP // Kirkwood comp analyzer'];
+  L.push('Target: '+(t.addr||'?')+'  list '+(t.list?money(num(t.list)):'?')+'  '+(t.sqft||'?')+' sqft  '+(t.bdba||''),'','COMPS:');
+  state.comps.forEach(c=>L.push(`- ${c.addr||'?'} | sold ${c.sold?money(c.sold):'-'} | list ${c.list?money(c.list):'-'} | ${c.sqft} sqft | $${c.sqft&&c.sold?Math.round(c.sold/c.sqft):'-'}/sqft`));
+  const e=computeEstimate();
+  if(e)L.push('',`ESTIMATE (${e.n} comps): ${money1k(e.low)} – ${money1k(e.high)}, mid ${money1k(e.mid)}${e.expect?`, if bid up ${money1k(e.expect)}`:''}`);
+  const txt=L.join('\n');
+  const done=()=>{ setStatus('work','✓ Copied to clipboard.'); setTimeout(()=>$('parse_status').innerHTML='',3000); window.scrollTo({top:$('parse_status').offsetTop-100,behavior:'smooth'}); };
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done,()=>downloadTxt(txt)); }
+  else downloadTxt(txt);
+};
+function downloadTxt(txt){
+  const b=new Blob([txt],{type:'text/plain'}), u=URL.createObjectURL(b), a=document.createElement('a');
+  a.href=u; a.download='comp-estimate.txt'; a.click(); URL.revokeObjectURL(u);
+}
+
+$('reset').onclick=()=>{
+  if(!confirm('Clear the current target and comps? Saved estimates are kept.'))return;
+  state={target:{addr:'',list:'',sqft:'',bdba:''},comps:[]}; save(); hydrate();
+  $('parse_status').innerHTML='';
+};
+
+/* ---------- init ---------- */
+if(!loadState())state=SEED();
+loadSaved(); hydrate(); renderSaved();
+</script>
+</body>
+</html>
