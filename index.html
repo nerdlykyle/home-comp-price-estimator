@@ -108,16 +108,71 @@
   .foot{display:flex;gap:10px;margin-top:6px}.foot .btn{flex:1}
   .disclaim{font-size:11px;color:var(--faint);text-align:center;margin-top:18px;line-height:1.5}
   .add-form{display:none;margin-top:12px}.add-form.show{display:block}
+
+  /* tabs */
+  .tabs{display:flex;gap:8px;margin-bottom:16px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:5px}
+  .tab{flex:1;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:9px;cursor:pointer;transition:.15s}
+  .tab.active{background:var(--cyan);color:var(--ink)}
+  .tab:not(.active):hover{color:var(--text)}
+
+  /* offer */
+  .grid-cure{display:grid;grid-template-columns:1fr 110px;gap:10px;margin-top:12px}
+  .tiertoggle{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted);margin:12px 0;cursor:pointer;font-weight:400}
+  .cbx2{width:19px;height:19px;border-radius:6px;border:1.5px solid var(--line2);background:var(--ink);position:relative;flex-shrink:0;transition:.15s}
+  .cbx2.on{background:var(--cyan);border-color:var(--cyan)}
+  .cbx2.on::after{content:"";position:absolute;left:6px;top:2px;width:4px;height:9px;border:solid var(--ink);border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .oitem{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .oitem:last-child{border-bottom:none}
+  .oitem-body{flex:1;min-width:0}
+  .oitem-label{font-size:13px;font-weight:500}
+  .oitem-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:2px}
+  .oitem-tag.typ{color:var(--amber)}
+  .oitem-cost{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;flex-shrink:0}
+  .oitem-cost.struck{color:var(--faint);text-decoration:line-through}
+  .anchor{background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:14px;margin-bottom:10px}
+  .anchor .alab{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .anchor .aval{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px;margin:4px 0 2px;letter-spacing:-.01em}
+  .anchor .adesc{font-size:12px;color:var(--muted)}
+  .anchor.floor .aval{color:var(--mint)}
+  .anchor.mid2 .aval{color:var(--cyan)}
+  .anchor.win .aval{color:var(--amber)}
+  .over{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:.06em}
+  .cure-line{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);text-align:center;margin:14px 0}
+  .cure-line b{color:var(--amber)}
+
+  /* header properties icon */
+  header{position:relative}
+  .iconbtn{position:absolute;top:0;right:0;background:var(--panel);border:1px solid var(--line2);border-radius:11px;
+    width:46px;height:46px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+  .iconbtn:hover{border-color:var(--cyan)}
+  .iconbtn.active{background:var(--cyan);border-color:var(--cyan)}
+  .iconbtn svg{width:22px;height:22px;stroke:var(--cyan);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .iconbtn.active svg{stroke:var(--ink)}
+  .badge{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;
+    background:var(--amber);color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+    display:none;align-items:center;justify-content:center}
+  .prop-est{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--faint);margin-top:2px}
+  .prop-offer{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mint);margin-top:2px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
+    <button class="iconbtn" id="nav-props" title="Saved properties" aria-label="Saved properties">
+      <svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 001 1h12a1 1 0 001-1v-9"/><path d="M9 20v-6h6v6"/></svg>
+      <span class="badge" id="prop_badge">0</span>
+    </button>
     <div class="eyebrow">Kirkwood · 63122</div>
     <h1>Comp<span class="slash">//</span></h1>
     <div class="tag">What a house actually sells for — read from the comps, not the list price.</div>
   </header>
 
+  <div class="tabs">
+    <button class="tab active" id="tab-est">Estimator</button>
+    <button class="tab" id="tab-offer">Offer</button>
+  </div>
+
+  <div id="view-estimator">
   <!-- TARGET -->
   <div class="card">
     <div class="sec-label">The house you want</div>
@@ -166,15 +221,9 @@
     <div class="sec-label" style="color:var(--cyan)">The estimate</div>
     <div id="est_body"><div class="empty">Pick at least two comps to see a number.</div></div>
     <div class="save-row">
-      <input id="save_name" placeholder="Name this estimate">
+      <input id="save_name" placeholder="Name this property">
       <button class="btn btn-cyan" id="save_est">Save</button>
     </div>
-  </div>
-
-  <!-- SAVED -->
-  <div class="card">
-    <div class="sec-label">Saved estimates</div>
-    <div id="saved_body"><div class="empty">Saved runs show up here. They persist on this device.</div></div>
   </div>
 
   <button class="btn btn-cyan" id="share" style="margin-bottom:10px">Copy share link</button>
@@ -184,12 +233,61 @@
     <button class="btn btn-line" id="reset">Clear current</button>
   </div>
   <div class="disclaim">Pure comps, no fudge factors. The estimate reads condition tiers and how these homes behaved against their list price. It can't see the house's lot, finishes, or the railroad — that read stays with you.</div>
-</div>
+  </div><!-- /view-estimator -->
+
+  <div id="view-offer" style="display:none">
+    <div class="card">
+      <div class="sec-label">From your estimate</div>
+      <div id="offer_anchor"><div class="empty">Build an estimate first — head to the Estimator tab.</div></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">Your budget ceiling</div>
+      <div class="field"><label>Most you'll pay</label><input id="o_ceiling" inputmode="numeric" placeholder="950000"></div>
+      <div class="hint">The hard cap. Any offer anchor above this gets flagged.</div>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">Known issues — cost to cure</div>
+      <div class="hint">Repairs from the inspection or seller's disclosure, in real dollars. Tick <b>normal for this tier</b> if every comparable home likely has the same wear — that's already baked into the comp price, so it doesn't subtract.</div>
+      <div id="o_items"></div>
+      <div class="grid-cure">
+        <input id="oi_label" placeholder="e.g. Roof replacement">
+        <input id="oi_cost" inputmode="numeric" placeholder="$ cost">
+      </div>
+      <label class="tiertoggle"><span class="cbx2" id="oi_typ"></span> Normal for this tier (don't subtract)</label>
+      <button class="btn btn-cyan" id="oi_add">Add issue</button>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">Flags — notes, no math</div>
+      <div class="hint">Things with no clean repair number: prior foundation repair, water history, flood zone. They ride along as notes on the run.</div>
+      <div id="o_flags"></div>
+      <div class="save-row">
+        <input id="of_label" placeholder="e.g. Prior foundation repair (2019)">
+        <button class="btn btn-line" id="of_add" style="width:auto">Add flag</button>
+      </div>
+    </div>
+
+    <div class="card est">
+      <div class="sec-label" style="color:var(--cyan)">What to offer</div>
+      <div id="offer_out"><div class="empty">Build an estimate, then add your budget ceiling to see your offer anchors.</div></div>
+    </div>
+
+    <div class="disclaim">This organizes your numbers and shows its arithmetic — it doesn't decide your offer. Repair costs are yours to set, and in a hot market you may have to absorb them on top of a winning bid. Not financial or real-estate advice.</div>
+  </div><!-- /view-offer -->
+
+  <div id="view-props" style="display:none">
+    <div class="card">
+      <div class="sec-label">Saved properties</div>
+      <div id="saved_body"><div class="empty">No saved properties yet. Build an estimate and tap Save.</div></div>
+    </div>
+  </div><!-- /view-props -->
 
 <script>
 const $=id=>document.getElementById(id);
 const KEY='comp_state_v1', SKEY='comp_saved_v1';
-let state={target:{addr:'',list:'',sqft:'',bdba:''},comps:[]};
+let state={target:{addr:'',list:'',sqft:'',bdba:''},comps:[],offer:{ceiling:'',items:[],flags:[]}};
 let saved=[];
 
 /* ---------- storage (localStorage; persists on a real domain) ---------- */
@@ -322,10 +420,13 @@ function computeEstimate(){
 }
 
 /* ---------- render ---------- */
+function ensureOffer(){ if(!state.offer) state.offer={ceiling:'',items:[],flags:[]}; }
 function hydrate(){
+  ensureOffer();
   $('t_addr').value=state.target.addr; $('t_list').value=state.target.list;
   $('t_sqft').value=state.target.sqft; $('t_bdba').value=state.target.bdba;
-  renderAll();
+  $('o_ceiling').value=state.offer.ceiling||'';
+  renderAll(); renderOffer();
 }
 function renderAll(){ renderLive(); renderTiers(); renderEstimate(); }
 function renderLive(){
@@ -396,21 +497,27 @@ function renderEstimate(){
     </div>
     <div class="read">${read}</div>`;
 }
+function updateBadge(){
+  const b=$('prop_badge'); if(!b)return;
+  b.textContent=saved.length; b.style.display=saved.length?'flex':'none';
+}
 function renderSaved(){
-  if(!saved.length){ $('saved_body').innerHTML='<div class="empty">Saved runs show up here. They persist on this device.</div>'; return; }
+  updateBadge();
+  if(!saved.length){ $('saved_body').innerHTML='<div class="empty">No saved properties yet. Build an estimate and tap Save.</div>'; return; }
   $('saved_body').innerHTML=saved.map(s=>`
     <div class="saved-item">
       <div class="saved-body">
         <div class="saved-name">${s.name}</div>
-        <div class="saved-meta">${s.summary} · ${new Date(s.at).toLocaleDateString()}</div>
+        <div class="prop-est">${s.summary}</div>
+        ${s.offerSummary?`<div class="prop-offer">offer · ${s.offerSummary}</div>`:''}
+        <div class="saved-meta">${new Date(s.at).toLocaleDateString()}</div>
       </div>
-      <div class="saved-act" data-load="${s.id}">Load</div>
+      <div class="saved-act" data-load="${s.id}">Open</div>
       <div class="del" data-delsaved="${s.id}">×</div>
     </div>`).join('');
   $('saved_body').querySelectorAll('[data-load]').forEach(el=>el.onclick=()=>{
     const s=saved.find(x=>x.id===el.dataset.load); if(!s)return;
-    state=JSON.parse(JSON.stringify(s.state)); save(); hydrate();
-    window.scrollTo({top:0,behavior:'smooth'});
+    state=JSON.parse(JSON.stringify(s.state)); save(); hydrate(); showView('est');
   });
   $('saved_body').querySelectorAll('[data-delsaved]').forEach(el=>el.onclick=()=>{
     saved=saved.filter(x=>x.id!==el.dataset.delsaved); persistSaved(); renderSaved();
@@ -454,10 +561,17 @@ $('m_save').onclick=()=>{
 $('save_est').onclick=()=>{
   const e=computeEstimate();
   if(!e){ alert('Build an estimate first — target sqft and at least two comps.'); return; }
-  const name=($('save_name').value.trim())||state.target.addr||'Untitled estimate';
+  const name=($('save_name').value.trim())||state.target.addr||'Untitled property';
   const summary=`${money1k(e.mid)} mid${e.expect?` · ${money1k(e.expect)} if bid up`:''} · ${e.n} comps`;
-  saved.unshift({id:uid(),name,at:Date.now(),summary,state:JSON.parse(JSON.stringify(state))});
+  const c=computeOffer();
+  let offerSummary='';
+  if(c && (c.ceiling || c.cure || state.offer.items.length)){
+    const win=c.ceiling?Math.min(c.stretch,c.ceiling):c.stretch;
+    offerSummary=`floor ${money1k(c.value)} · stretch ${money1k(win)}${c.cure?` · ${money(c.cure)} repairs`:''}`;
+  }
+  saved.unshift({id:uid(),name,at:Date.now(),summary,offerSummary,state:JSON.parse(JSON.stringify(state))});
   persistSaved(); renderSaved(); $('save_name').value='';
+  showView('props');
 };
 
 $('export').onclick=()=>{
@@ -489,6 +603,99 @@ $('reset').onclick=()=>{
   if(!confirm('Clear the current target and comps? Saved estimates are kept.'))return;
   state={target:{addr:'',list:'',sqft:'',bdba:''},comps:[]}; save(); hydrate();
   $('parse_status').innerHTML='';
+};
+
+/* ---------- offer tab ---------- */
+let oiTypical=false;
+function showView(which){
+  $('view-estimator').style.display=which==='est'?'':'none';
+  $('view-offer').style.display=which==='offer'?'':'none';
+  $('view-props').style.display=which==='props'?'':'none';
+  $('tab-est').classList.toggle('active',which==='est');
+  $('tab-offer').classList.toggle('active',which==='offer');
+  $('nav-props').classList.toggle('active',which==='props');
+  if(which==='offer')renderOffer();
+  if(which==='props')renderSaved();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+$('tab-est').onclick=()=>showView('est');
+$('tab-offer').onclick=()=>showView('offer');
+$('nav-props').onclick=()=>showView('props');
+
+function computeOffer(){
+  const e=computeEstimate(); if(!e)return null;
+  ensureOffer(); const o=state.offer;
+  const ceiling=num(o.ceiling);
+  const cure=o.items.filter(i=>!i.typical).reduce((s,i)=>s+num(i.cost),0);
+  const value=e.mid-cure;
+  const competitive=e.expect||e.high;
+  const stretch=Math.max(e.expect||0,e.high);
+  return {e,ceiling,cure,value,competitive,stretch};
+}
+
+function renderOffer(){
+  ensureOffer(); const o=state.offer;
+  const e=computeEstimate();
+  // anchor readout
+  $('offer_anchor').innerHTML = e
+    ? `<div class="range-big" style="text-align:left;margin:0">Likely sale price</div>
+       <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;margin-top:4px">${money1k(e.low)}–${money1k(e.high).replace('$','')} · midpoint <b style="color:var(--cyan)">${money1k(e.mid)}</b>${e.expect?` · bids-like ${money1k(e.expect)}`:''}</div>`
+    : '<div class="empty">Build an estimate first — head to the Estimator tab.</div>';
+  // issue items
+  $('o_items').innerHTML = o.items.length ? o.items.map(i=>`
+    <div class="oitem">
+      <div class="oitem-body"><div class="oitem-label">${i.label||'(unnamed)'}</div>
+        <div class="oitem-tag ${i.typical?'typ':''}">${i.typical?'normal for tier · not subtracted':'cost to cure'}</div></div>
+      <div class="oitem-cost ${i.typical?'struck':''}">${money(num(i.cost))}</div>
+      <div class="del" data-delitem="${i.id}">×</div>
+    </div>`).join('') : '<div class="empty" style="padding:10px">No issues logged yet.</div>';
+  o.items.length && $('o_items').querySelectorAll('[data-delitem]').forEach(el=>el.onclick=()=>{
+    state.offer.items=o.items.filter(x=>x.id!==el.dataset.delitem); save(); renderOffer();
+  });
+  // flags
+  $('o_flags').innerHTML = o.flags.length ? o.flags.map(f=>`
+    <div class="oitem"><div class="oitem-body"><div class="oitem-label">⚑ ${f.label}</div></div>
+      <div class="del" data-delflag="${f.id}">×</div></div>`).join('') : '<div class="empty" style="padding:10px">No flags yet.</div>';
+  o.flags.length && $('o_flags').querySelectorAll('[data-delflag]').forEach(el=>el.onclick=()=>{
+    state.offer.flags=o.flags.filter(x=>x.id!==el.dataset.delflag); save(); renderOffer();
+  });
+  // output
+  const c=computeOffer();
+  if(!c){ $('offer_out').innerHTML='<div class="empty">Build an estimate, then add a budget ceiling to see your offer anchors.</div>'; return; }
+  const cap=c.ceiling||0;
+  const overTag=v=>(cap&&v>cap)?'<span class="over">over your cap</span>':'';
+  const winShown=cap?Math.min(c.stretch,cap):c.stretch;
+  // reasoning
+  let read;
+  if(cap && c.competitive>cap){
+    read=`The over-list pattern points to about <b>${money1k(c.competitive)}</b> to stay competitive — above your <b>${money1k(cap)}</b> cap. This one may be out of reach unless the comps soften or you stretch the budget.`;
+  }else{
+    read=`After roughly <b>${money(c.cure)}</b> in known repairs, it's worth about <b>${money1k(c.value)}</b> to you. To win, the market points toward <b>${money1k(c.competitive)}</b>, and stretching to <b>${money1k(winShown)}</b>${cap?' (your cap)':''} is what it may take. Remember you'd likely absorb that <b>${money(c.cure)}</b> in repairs on top of whatever you bid.`;
+  }
+  $('offer_out').innerHTML=`
+    <div class="anchor floor"><div class="alab"><span>Value floor — worth to you</span>${overTag(c.value)}</div>
+      <div class="aval">${money1k(c.value)}</div><div class="adesc">Comp midpoint minus ${money(c.cure)} in non-typical repairs. Walk-away-happy price.</div></div>
+    <div class="anchor mid2"><div class="alab"><span>Competitive — to be in the running</span>${overTag(c.competitive)}</div>
+      <div class="aval">${money1k(c.competitive)}</div><div class="adesc">Where these comps' over-list behavior points.</div></div>
+    <div class="anchor win"><div class="alab"><span>Stretch — top to win</span>${cap&&c.stretch>cap?'<span class="over">capped at budget</span>':''}</div>
+      <div class="aval">${money1k(winShown)}</div><div class="adesc">Top of the data${cap?', held to your '+money1k(cap)+' ceiling':''}.</div></div>
+    ${c.cure>0?`<div class="cure-line">Known repairs you'd absorb: <b>${money(c.cure)}</b></div>`:''}
+    <div class="read">${read}</div>`;
+}
+
+$('o_ceiling').addEventListener('input',e=>{ ensureOffer(); state.offer.ceiling=e.target.value; save(); renderOffer(); });
+$('oi_typ').onclick=()=>{ oiTypical=!oiTypical; $('oi_typ').classList.toggle('on',oiTypical); };
+$('oi_add').onclick=()=>{
+  const label=$('oi_label').value.trim(), cost=num($('oi_cost').value);
+  if(!label && !cost){ return; }
+  ensureOffer();
+  state.offer.items.push({id:uid(),label,cost,typical:oiTypical});
+  $('oi_label').value=''; $('oi_cost').value=''; oiTypical=false; $('oi_typ').classList.remove('on');
+  save(); renderOffer();
+};
+$('of_add').onclick=()=>{
+  const label=$('of_label').value.trim(); if(!label)return;
+  ensureOffer(); state.offer.flags.push({id:uid(),label}); $('of_label').value=''; save(); renderOffer();
 };
 
 /* ---------- init ---------- */
